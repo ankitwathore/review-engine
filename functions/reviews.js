@@ -1,14 +1,13 @@
-import express from 'express';
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { getJudgeMeProductId } from './products.js'; // Import the function from products.js
-import * as dfd from 'danfojs-node';
+const express = require('express');
+const axios = require('axios');
+const dotenv = require('dotenv');
+const dfd = require('danfojs-node');
+const serverless = require('serverless-http');
 
 dotenv.config();
 
+const app = express();
 const router = express.Router();
-
-console.log('open ai key:', process.env.OPENAI_API_KEY); // Debugging
 
 router.get('/:product_external_id/:num_reviews', async (req, res) => {
     const shopifyProductId = req.params.product_external_id;
@@ -16,10 +15,9 @@ router.get('/:product_external_id/:num_reviews', async (req, res) => {
 
     try {
         const judgeMeProductId = await getJudgeMeProductId(shopifyProductId);
-        console.log(`Using Judge.me product ID: ${judgeMeProductId}`);
 
         const accessToken = process.env.JUDGEME_ACCESS_TOKEN;
-        const perPage = 100; // Adjust this based on API limits
+        const perPage = 100; 
         let page = 1;
         let allReviews = [];
 
@@ -33,7 +31,7 @@ router.get('/:product_external_id/:num_reviews', async (req, res) => {
             });
 
             if (response.data.reviews.length === 0) {
-                break; // No more reviews available
+                break; 
             }
 
             allReviews = allReviews.concat(response.data.reviews);
@@ -42,14 +40,17 @@ router.get('/:product_external_id/:num_reviews', async (req, res) => {
 
         console.log(`Retrieved ${allReviews.length} reviews successfully.`);
 
-        // Perform sentiment analysis, score reviews, and get top X reviews
+        if (allReviews.length === 0) {
+            return res.status(404).json({ error: 'No reviews found' });
+        }
+
         const topReviews = await analyzeAndScoreReviews(allReviews, numReviews);
-        
-        res.json(dfd.toJSON(topReviews, { format: 'row' }));
+
+        res.json(dfd.toJSON(topReviews));
     } catch (error) {
         console.error('Error retrieving reviews:', error.message);
         if (error.response) {
-            console.error('API Response Error:', error.response.data); // Log the API response error details
+            console.error('API Response Error:', error.response.data); 
             res.status(error.response.status).send(error.response.data);
         } else {
             res.status(500).send('Failed to retrieve reviews');
@@ -96,7 +97,6 @@ async function analyzeAndScoreReviews(reviews, numReviews) {
     df.addColumn('sentiment_score', sentimentScores, { inplace: true });
     df.addColumn('final_score', finalScores, { inplace: true });
 
-    console.log("df:" + df )
     // Sort DataFrame by final score and get top numReviews
     const sortedDf = df.sortValues('final_score', { ascending: false });
     return sortedDf.head(numReviews);
@@ -112,7 +112,7 @@ async function getSentiment(text) {
         max_tokens: 10,
     }, {
         headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Authorization': `Bearer ${process.env.OPENAI_KEY}`,
             'Content-Type': 'application/json',
         },
     });
@@ -121,4 +121,60 @@ async function getSentiment(text) {
     return isNaN(sentiment) ? 0 : sentiment;
 }
 
-export default router;
+async function getJudgeMeProductId(shopifyProductId) {
+    const accessToken = process.env.JUDGEME_ACCESS_TOKEN;
+
+    if (!accessToken) {
+        throw new Error('No access token found. Please set the access token in the environment variables.');
+    }
+
+    let page = 1;
+    const perPage = 10;
+    const url = `https://judge.me/api/v1/products`;
+
+    while (true) {
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                params: {
+                    page,
+                    per_page: perPage
+                }
+            });
+
+            const products = response.data.products;
+            if (!products || !Array.isArray(products)) {
+                throw new Error('Invalid response format');
+            }
+
+            for (let product of products) {
+                if (product.external_id == shopifyProductId) {
+                    console.log(`Matched product ID: ${product.id} for Shopify product ID: ${shopifyProductId}`);
+                    return product.id;
+                }
+            }
+
+            if (products.length < perPage) {
+                break;
+            }
+
+            page++;
+        } catch (error) {
+            console.error('Error retrieving products:', error.message);
+            if (error.response) {
+                console.error('API Response Error:', error.response.data);
+                throw new Error(error.response.data);
+            } else {
+                throw new Error('Failed to retrieve products');
+            }
+        }
+    }
+
+    throw new Error('Product not found.');
+}
+
+app.use('/.netlify/functions/reviews', router);
+
+module.exports.handler = serverless(app);

@@ -1,0 +1,36 @@
+{
+  "version": "3",
+  "remote": {
+    "https://edge.netlify.com/": "ff84a16f192fdb43db8b9dff869889f555c05857d075044d2a7cfa54c283a0a0",
+    "https://edge.netlify.com/bootstrap/config.ts": "0aa0a225d978b89e0e62cbd853701605199e7a84095e55eeb70147faf1a24803",
+    "https://edge.netlify.com/bootstrap/context.ts": "f8392d0bfc4a345f0508157a9ed1a8b0ac832275e5ae6fe9301a8268fbfeb0b5",
+    "https://edge.netlify.com/bootstrap/cookie.ts": "8b0baae708989ca183c6f3b4ab3d029e6abcbc2e43f93edeb0ff447b3bbc3a05",
+    "https://edge.netlify.com/bootstrap/edge_function.ts": "b8253e86aa83c67341f5cfedeba5049d77fbf84dcab7eceff7566b7728ae9b39",
+    "https://edge.netlify.com/bootstrap/globals.ts": "38f9e0be6c2c78206bf14d2387d41964d38bbe81644b3668e203c6f6473408a7"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@types/cookie-parser@^1.4.7",
+        "npm:@types/express-session@^1.18.0",
+        "npm:@types/express@^4.17.21",
+        "npm:@types/morgan@^1.9.9",
+        "npm:axios@^1.7.2",
+        "npm:cookie-parser@~1.4.4",
+        "npm:danfojs-node@^1.1.2",
+        "npm:debug@~2.6.9",
+        "npm:dotenv@^16.4.5",
+        "npm:express-session@^1.18.0",
+        "npm:express@~4.16.1",
+        "npm:http-errors@~1.6.3",
+        "npm:http@^0.0.1-security",
+        "npm:jade@~1.11.0",
+        "npm:morgan@~1.9.1",
+        "npm:node-cache@^5.1.2",
+        "npm:openai@^4.52.0",
+        "npm:query-string@^9.0.0",
+        "npm:simple-oauth2@^5.0.1"
+      ]
+    }
+  }
+}
