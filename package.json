@@ -3,15 +3,24 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node functions/reviews.js",
-    "build": "npm install"
+    "build": "mkdir -p public && echo '<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Placeholder</title></head><body><h1>Placeholder Page</h1><p>This is a placeholder page.</p></body></html>' > public/index.html"
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "cookie-parser": "~1.4.4",
     "danfojs-node": "^1.1.2",
+    "debug": "~2.6.9",
     "dotenv": "^16.4.5",
-    "express": "^4.18.2",
+    "express": "~4.16.1",
+    "express-session": "^1.18.0",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
     "openai": "^4.52.0",
-    "serverless-http": "^3.2.0"
+    "query-string": "^9.0.0",
+    "serverless-http": "^2.6.1",
+    "simple-oauth2": "^5.0.1",
+    "plotly.js-dist-min": "^2.12.1"
   },
   "devDependencies": {
     "netlify-cli": "^17.33.0"
